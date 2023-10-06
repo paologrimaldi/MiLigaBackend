@@ -1,5 +1,6 @@
 const Usuario = require("../models/Usuario");
 const Equipo = require("../models/Equipo");
+const Jugador = require("../models/Jugador");
 const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 require("dotenv").config({ path: "variables.env" });
@@ -15,6 +16,10 @@ const resolvers = {
     obtenerEquipos: async (_, {}, ctx) => {
       const equipos = await Equipo.find({ creador: ctx.usuario.id });
       return equipos;
+    },
+    obtenerJugadores: async (_, {}, ctx) => {
+      const jugadores = await Jugador.find({ creador: ctx.usuario.id });
+      return jugadores;
     },
   },
   Mutation: {
@@ -59,6 +64,7 @@ const resolvers = {
         token: crearToken(existeUsuario, process.env.SECRET, "2hr"),
       };
     },
+
     nuevoEquipo: async (_, { input }, ctx) => {
       try {
         const equipo = new Equipo(input);
@@ -67,7 +73,6 @@ const resolvers = {
         equipo.creador = ctx.usuario.id;
 
         const resultado = await equipo.save();
-        console.log("desde resolver", ctx);
         return resultado;
       } catch (error) {
         console.log(error);
@@ -79,7 +84,7 @@ const resolvers = {
         let equipo = await Equipo.findById(id);
 
         if (!equipo) {
-          throw new Error("Proyecto no encontrado");
+          throw new Error("Equipo no encontrado");
         }
         //revisar si la persona que edita es el creador
         console.log(equipo);
@@ -103,7 +108,7 @@ const resolvers = {
         let equipo = await Equipo.findById(id);
 
         if (!equipo) {
-          throw new Error("Proyecto no encontrado");
+          throw new Error("Equipo no encontrado");
         }
         //revisar si la persona que edita es el creador
 
@@ -114,6 +119,64 @@ const resolvers = {
         equipo = await Equipo.findOneAndDelete({ _id: id });
 
         return "Equipo eliminado correctamente";
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
+    nuevoJugador: async (_, { input }, ctx) => {
+      try {
+        const jugador = new Jugador(input);
+
+        //asociar el creador
+        jugador.creador = ctx.usuario.id;
+
+        const resultado = await jugador.save();
+        return resultado;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    actualizarJugador: async (_, { id, input }, ctx) => {
+      try {
+        //revisar si el equipo existe
+        let jugador = await Jugador.findById(id);
+
+        if (!jugador) {
+          throw new Error("Jugador no encontrado");
+        }
+        //revisar si la persona que edita es el creador
+
+        if (jugador.creador.toString() !== ctx.usuario.id) {
+          throw new Error("no tienes las credenciales para editar");
+        }
+        //guardar el equipo
+        jugador = await Jugador.findOneAndUpdate({ _id: id }, input, {
+          new: true,
+        });
+
+        return jugador;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    eliminarJugador: async (_, { id }, ctx) => {
+      try {
+        //revisar si el equipo existe
+        let jugador = await Jugador.findById(id);
+
+        if (!jugador) {
+          throw new Error("Proyecto no encontrado");
+        }
+        //revisar si la persona que edita es el creador
+
+        if (jugador.creador.toString() !== ctx.usuario.id) {
+          throw new Error("no tienes las credenciales para editar");
+        }
+        //guardar el equipo
+        jugador = await Jugador.findOneAndDelete({ _id: id });
+
+        return "Jugador eliminado correctamente";
       } catch (error) {
         console.log(error);
       }

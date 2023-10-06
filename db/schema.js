@@ -6,8 +6,14 @@ const typeDefs = gql`
     id: ID
   }
 
+  type Jugador {
+    nombre: String
+    id: ID
+  }
+
   type Query {
     obtenerEquipos: [Equipo]
+    obtenerJugadores: [Jugador]
   }
 
   input UsuarioInput {
@@ -25,6 +31,10 @@ const typeDefs = gql`
     nombre: String!
   }
 
+  input JugadorInput {
+    nombre: String!
+  }
+
   type Token {
     token: String
   }
@@ -32,9 +42,14 @@ const typeDefs = gql`
   type Mutation {
     crearUsuario(input: UsuarioInput): String
     autenticarUsuario(input: AutenticarInput): Token
+
     nuevoEquipo(input: EquipoInput): Equipo
     actualizarEquipo(id: ID!, input: EquipoInput): Equipo
     eliminarEquipo(id: ID!): String
+
+    nuevoJugador(input: JugadorInput): Jugador
+    actualizarJugador(id: ID!, input: JugadorInput): Jugador
+    eliminarJugador(id: ID!): String
   }
 `;
 
